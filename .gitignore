@@ -1,0 +1,9 @@
+
+*.orig
+Makefile
+*.dblite
+*.o
+*.so
+*.dll
+*.exe
+proteus
