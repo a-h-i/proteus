@@ -1,9 +1,11 @@
 #pragma once
 #include "typedefs.hpp"
-#include <memory>
-#include <unordered_map>
+#include <set>
 #include <list>
+#include <memory>
 #include <type_traits>
+#include <unordered_map>
+
 
 namespace gen {
 
@@ -20,10 +22,10 @@ struct Entry {
     std::size_t lineNumber;
     bool used;
     Entry() = default;
-    Entry(const Entry &) = default;
-    Entry(Entry &&) = default;
-    Entry &operator=(const Entry&) = default;
-    Entry &operator=(Entry &&) = default;
+    Entry( const Entry & ) = default;
+    Entry( Entry && ) = default;
+    Entry &operator=( const Entry & ) = default;
+    Entry &operator=( Entry && ) = default;
 };
 
 class SymTable {
@@ -53,11 +55,12 @@ public:
         deps.erase( identifier );
     }
 
-    void addDep(sentence_t &sent, const std::string &identifier) {
-        if(deps.count(identifier) == 0) {
-            deps.emplace(identifier, std::make_shared<std::list<sentence_t>>());
+    void addDep( sentence_t &sent, const std::string &identifier ) {
+        if ( deps.count( identifier ) == 0 ) {
+            deps.emplace( identifier, std::make_shared<std::list<sentence_t>>() );
         }
-        deps[identifier]->push_back(sent);
+
+        deps[identifier]->push_back( sent );
     }
 
     /**********************************************************
@@ -65,15 +68,16 @@ public:
      * it was defined. Creates one if it doesn't exist.       *
      **********************************************************/
     auto dependecies( const std::string &identifier,
-               bool remove = true ) -> typename std::remove_reference<decltype(deps[0])>::type {
+                      bool remove = true ) -> typename
+    std::remove_reference<decltype( deps[0] )>::type {
         if ( deps.count( identifier ) == 0 ) {
-            deps.emplace(identifier, std::make_shared<std::list<sentence_t>>());
+            deps.emplace( identifier, std::make_shared<std::list<sentence_t>>() );
         }
 
         auto list = deps[identifier];
 
         if ( remove ) {
-            removeDeps(identifier);
+            removeDeps( identifier );
         }
 
         return list;
@@ -86,6 +90,28 @@ public:
     Entry &operator[]( const std::string &identifier ) {
         return table[identifier];
     }
+    std::set<std::string> undefinedVariables() const {
+        std::set<std::string> uvars;
 
+        for ( const auto &vlPair : deps ) {
+            if ( !vlPair.second->empty() ) {
+                uvars.insert( vlPair.first );
+            }
+        }
+
+        return uvars;
+    }
+
+    std::set<std::string> unUsedVariables() const {
+        std::set<std::string> unused;
+
+        for ( const auto &vePair : table ) {
+            if ( !vePair.second.used ) {
+                unused.insert( vePair.first );
+            }
+        }
+
+        return unused;
+    }
 };
 }

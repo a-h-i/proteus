@@ -18,11 +18,11 @@ release = env.Clone()
 release['CXXFLAGS'] = '-Wall -Werror -std=c++11 -O3 -fPIE'
 
 debug = env.Clone()
-debug['CXXFLAGS'] = '-Wall -Werror -std=c++11 -g -fPIE'
+debug['CXXFLAGS'] = '-Wall -Werror -std=c++11 -g -fPIE -DDEBUG_ME_SOFTLY'
 
 
 
-packages = ['src/generator']
+packages = ['src/generator', 'src/ui']
 
 # Objects
 d_objs = [make_package(debug, 'dbg', p) for p in packages]

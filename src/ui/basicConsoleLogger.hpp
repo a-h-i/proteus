@@ -7,13 +7,13 @@
  * Basic Logger , logs to standard error stream. *
  * Used for testing Purposes.                    *
  *************************************************/
-struct BasicConsoleLogger: Ilogger {
+struct BasicConsoleLogger: ILogger {
 
     BasicConsoleLogger &operator<<( const std::string &str ) override {
         std::cerr << str;
         return *this;
     }
-    virtual BasicConsoleLogger &operator<<( const char *st ) override {
+    virtual BasicConsoleLogger &operator<<( const char *str ) override {
         std::cerr << str;
         return *this;
     }

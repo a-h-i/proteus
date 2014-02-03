@@ -1,8 +1,8 @@
 #pragma once
-#include "../ui/ilogger.hpp"
-#include "exceptions.hpp"
 #include "symtable.hpp"
 #include "typedefs.hpp"
+#include "exceptions.hpp"
+#include "../ui/ilogger.hpp"
 #include <memory>
 #include <string>
 #include <fstream>
@@ -19,8 +19,8 @@ namespace parsing {
 
 class ConfigurationParser {
     std::shared_ptr<ILogger> logger;
-    std::unordered_map<sentence_t, id_t, sentValueHash> map_;
-    std::unordered_set<sentence_t, sentValueHash> sents_;
+    std::unordered_map<sentence_t, id_t, sentValueHash, sentValueEq> map_;
+    std::unordered_set<sentence_t, sentValueHash, sentValueEq> sents_;
     SymTable syms;
     bool error_;
 public:
@@ -46,15 +46,23 @@ public:
      * Throws FileError if File is not a regular file                     *
      **********************************************************************/
     void parseFile( const boost::filesystem::path &file );
-    auto sentences() const -> decltype(sents_) {
+    auto sentences() -> decltype( sents_ ) {
         return sents_;
     }
-    auto  map() const -> decltype(map_) {
+    auto  map() -> decltype( map_ ) {
         return map_;
     }
     bool error() const {
         return error_;
     }
+
+    auto sentences() const -> const decltype(  sents_ ) & {
+        return sents_;
+    }
+    auto  map() const -> const decltype(  map_ ) & {
+        return map_;
+    }
+
 private:
     warningLevel_t warnLevel;
     /******************************************
@@ -75,6 +83,26 @@ private:
     void handleSentence( boost::smatch &, const boost::filesystem::path &,
                          const std::size_t );
 };
+
+
+
+template <typename Stream>
+void printConfiguration( Stream &&s, const ConfigurationParser &conf ) {
+    s << "Error: " <<  ( conf.error() ? "True" : "False" )
+      << "\nSentences:\n";
+
+    for ( auto &sent : conf.sentences() ) {
+        s << *sent << '\n';
+    }
+
+
+    s << "(Sentence , ID) pairs:\n";
+
+    for (  auto &siPair : conf.map() ) {
+        s << "( " << *( siPair.first ) << " , "
+          << siPair.second << " )\n";
+    }
+}
 
 }
 }
