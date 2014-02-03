@@ -20,5 +20,6 @@ struct PortAudio : Exception {
     PortAudio &operator=( PortAudio && ) = default;
 };
 
+
 }
 }

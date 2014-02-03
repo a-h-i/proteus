@@ -1,0 +1,17 @@
+CXX=clang++
+CXX_FLAGS=-Wall -Werror -Wextra -pedentic -std=c++11 -g
+LD_FLAGS= `pkg-config --libs pocketsphinx`  `pkg-config --libs portaudio-2.0`
+TARGET=proteus
+SOURCES=recognizer/recorder/callbacks.cpp recognizer/recorder/microphone.cpp
+OBJECTS=$(SOURCES:.cpp=.o)
+
+all: $(SOURCES) $(TARGET)
+
+$(TARGET): $(OBJECTS) 
+	$(CXX) $(CXX_FLAGS) $(LD_FLAGS) $(OBJECTS) -o $@
+
+.cpp.o:
+	$(CXX) $(CXX_FLAGS) $< -o $@
+
+clean:
+	rm *.o $(TARGET)
