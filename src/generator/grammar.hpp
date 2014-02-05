@@ -28,6 +28,7 @@ namespace grammar {
  *************************************************/
 
 
+
 typedef std::list<std::string> production_t;
 
 class Grammar {
@@ -41,9 +42,9 @@ public:
             boost::split( productions_.back(), *s, boost::is_any_of( " " ) );
         }
     }
-    void Optimize( optimizer_t &o ) {
-        auto result = o( productions_ );
-        //TODO: Implement
+    void optimize( optimizer_t o ) {
+        productions_.push_back(o( productions_ ));
+
     }
     const std::list<production_t> &productions() const {
         return productions_;
@@ -76,6 +77,7 @@ void print( Stream &&s, const Grammar &g ) {
 
         i++;
     }
+    std::cout << "Grammar Size: "  << prods.size() << '\n';
 }
 
 }
