@@ -1,0 +1,3 @@
+#JSGF V1.0;
+grammar optSimple;
+public <start> =(((((Open)|(Close)|(Open The))File))|(Exit))

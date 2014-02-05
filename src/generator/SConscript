@@ -3,6 +3,6 @@ Import("tag")
 def make_objs(file_list, suffix, enviroment) :
     return [ enviroment.Object(file + '-' + suffix + '.o', file + '.cpp' ) for file in file_list ]
 
-files = Split('parser optimizer')
+files = Split('parser optimizer jsgf')
 objs = make_objs(files, tag, env)
 Return('objs')

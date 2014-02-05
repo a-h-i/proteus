@@ -5,7 +5,10 @@
 
 #include <list>
 #include <string>
+#include <sstream>
+#include <iterator>
 #include <functional>
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 namespace gen {
@@ -43,7 +46,7 @@ public:
         }
     }
     void optimize( optimizer_t o ) {
-        productions_.push_back(o( productions_ ));
+        productions_.push_back( o( productions_ ) );
 
     }
     const std::list<production_t> &productions() const {
@@ -77,8 +80,12 @@ void print( Stream &&s, const Grammar &g ) {
 
         i++;
     }
+
     std::cout << "Grammar Size: "  << prods.size() << '\n';
 }
+
+
+std::string createJSGF( const Grammar &g, const std::string &name );
 
 }
 namespace optimizers {

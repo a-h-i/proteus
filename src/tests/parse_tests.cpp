@@ -1,8 +1,8 @@
 #ifdef DEBUG_ME_SOFTLY
 
+#include "catch.hpp"
 #include "../ui/basicConsoleLogger.hpp"
 #include "../generator/parser.hpp"
-#include "catch.hpp"
 #include <memory>
 #include <string>
 

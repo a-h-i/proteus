@@ -1,0 +1,3 @@
+#JSGF V1.0;
+grammar nonoptSimple;
+public <start> =(Open The File)|(Exit)|(Close File)|(Open File)
