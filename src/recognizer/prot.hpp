@@ -9,6 +9,15 @@
 #include <pocketsphinx/pocketsphinx.h>
 
 
+//  _________________________________
+// < this is where the magic happens >
+//  ---------------------------------
+//         \   ^__^
+//          \  (oo)\_______
+//             (__)\       )\/\
+//                 ||----w |
+//                 ||     ||
+
 
 class Prot {
     proteus::utility::Microphone mic;

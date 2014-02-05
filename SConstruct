@@ -33,18 +33,19 @@ r_objs = [make_package(release, 'rel', p) for p in packages]
 
 # Targets
 d_target = debug.Program('proteus-dbg', d_objs)
-r_target = release.Program('proteus-tool', r_objs)
+r_target = release.Program('proteus', r_objs)
 
 
 
 
-lib_libs = '-lpocketsphinx -lsphinxbase -lsphinxad  -L/usr/local/lib -lportaudio -lasound -lm -lpthread '
+
 #library
-libenv = Environment(CXX = 'clang++', ENV = {'PATH' : os.environ['PATH']}, LIBS=lib_libs)
-libenv['ENV']['TERM'] = os.environ['TERM']
-libenv['CXXFLAGS'] = '-Wall -Werror -std=c++11 -O3 -I/usr/include/sphinxbase -I/usr/include/pocketsphinx -I/usr/include/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/sphinxbase '
+linkflags = ' `pkg-config --libs pocketsphinx` ' + ' `pkg-config --libs portaudio-2.0` -fpic'
 
+libenv = Environment(CXX = 'clang++', ENV = {'PATH' : os.environ['PATH']}, LINKFLAGS=linkflags)
+libenv['ENV']['TERM'] = os.environ['TERM']
+libenv['CXXFLAGS'] = '-Wall -Werror -fpic -std=c++11 -O3   -I/usr/include/sphinxbase -I/usr/include/pocketsphinx -I/usr/include/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/sphinxbase '
 lib_packages = ['src/recognizer', 'src/recognizer/recorder']
-lib_objs = [make_package(libenv, 'rel', p) for p in lib_packages]
+lib_objs = [make_package(libenv, 'lib', p) for p in lib_packages]
 l_target = libenv.SharedLibrary("proteus", lib_objs)
-Default(l_target)
+libenv.Alias('lib', [l_target])

@@ -2,9 +2,6 @@
 #include "recorder/microphone.hpp"
 #include "prot.hpp"
 
-
-
-
 prot_t init_prot(const char * grammar, const char * dict) {
     return new Prot(grammar, dict);
 }

@@ -10,3 +10,4 @@ proteus
 proteus-dbg
 *.jsgf
 *.fsg
+*.os
