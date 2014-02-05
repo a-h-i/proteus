@@ -31,7 +31,7 @@ std::string gen::grammar::createJSGF( const Grammar &g, const std::string &name 
         buff << printProduction(p);
         buff << ")";
     }
-
+    buff << ";";
     std::string str = buff.str();
     auto space = []( char lhs, char rhs ) {
         return ( lhs == rhs ) & ( rhs == ' ' );
