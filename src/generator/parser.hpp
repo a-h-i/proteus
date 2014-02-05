@@ -87,7 +87,7 @@ private:
 
 
 template <typename Stream>
-void printConfiguration( Stream &&s, const ConfigurationParser &conf ) {
+void print( Stream &&s, const ConfigurationParser &conf ) {
     s << "Error: " <<  ( conf.error() ? "True" : "False" )
       << "\nSentences:\n";
 
