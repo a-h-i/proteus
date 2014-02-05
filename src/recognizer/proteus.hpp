@@ -3,9 +3,12 @@
 
 typedef void * prot_t;
 extern "C" {
-    prot_t init_prot(const char * grammar, const char * dict);
-    // fully ended
+    // must call before any other function
+    prot_t prot_init(const char * grammar, const char * dict);
+    // 'push to talk' style
     // freeing returned pointer is responsibility of user
-    const char * recog_word(prot_t);
+    char * recog_word(prot_t);
+    // call when finished to release resources
+    void prot_free(prot_t);
 
 }
