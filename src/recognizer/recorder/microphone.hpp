@@ -2,6 +2,7 @@
 #include <portaudio.h>
 #include "../common/exceptions.hpp"
 #include "callbacks.hpp"
+class Prot;
 namespace proteus {
 namespace utility {
 
@@ -11,6 +12,7 @@ namespace utility {
  * Utilizes PortAudio for cross-platform *
  * Audio Capture.                        *
  *****************************************/
+
 class Microphone {
     friend int callbacks::capturingCallback( const void *input,
                        void *output,
@@ -27,11 +29,12 @@ public:
      * Throws PortAudio exception if failed *
      * to Initialize PA.                    *
      ****************************************/
-    Microphone(const double sampleRate = 8000.0, const unsigned long framesPerBuffer = 200);
+    Microphone(Prot *, const double sampleRate = 8192.0, const unsigned long framesPerBuffer = 4096);
     double sampleRate() { return sampleRate_;}
     unsigned long framesPerBuffer(){return framesPerBuffer_;}
-    start();
-    stop();
+    void start();
+    void stop();
+    bool isRecording() {return recording;}
     ~Microphone();
 };
 

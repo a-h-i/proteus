@@ -12,7 +12,7 @@ def make_package(env, tag, package) :
 
 # Add libs here
 libs = Split( ' -lboost_regex -lboost_filesystem -lboost_system' )
-env = Environment(CXX = 'clang++', ENV = {'PATH' : os.environ['PATH']}, LINKFLAGS='-fPIE', LIBS=libs)
+env = Environment(CXX = 'clang++', ENV = {'PATH' : os.environ['PATH']}, LINKFLAGS='-fPIC', LIBS=libs)
 env['ENV']['TERM'] = os.environ['TERM']
 release = env.Clone()
 release['CXXFLAGS'] = '-Wall -Werror -std=c++11 -O3 -fPIE'
@@ -33,5 +33,18 @@ r_objs = [make_package(release, 'rel', p) for p in packages]
 
 # Targets
 d_target = debug.Program('proteus-dbg', d_objs)
-r_target = release.Program('proteus', r_objs)
-Default(d_target)
+r_target = release.Program('proteus-tool', r_objs)
+
+
+
+
+lib_libs = '-lpocketsphinx -lsphinxbase -lsphinxad  -L/usr/local/lib -lportaudio -lasound -lm -lpthread '
+#library
+libenv = Environment(CXX = 'clang++', ENV = {'PATH' : os.environ['PATH']}, LIBS=lib_libs)
+libenv['ENV']['TERM'] = os.environ['TERM']
+libenv['CXXFLAGS'] = '-Wall -Werror -std=c++11 -O3 -I/usr/include/sphinxbase -I/usr/include/pocketsphinx -I/usr/include/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/sphinxbase '
+
+lib_packages = ['src/recognizer', 'src/recognizer/recorder']
+lib_objs = [make_package(libenv, 'rel', p) for p in lib_packages]
+l_target = libenv.SharedLibrary("proteus", lib_objs)
+Default(l_target)
