@@ -25,20 +25,20 @@ class ConfigurationParser {
     bool error_;
 public:
     typedef char warningLevel_t;
-    static constexpr char Wall = 0xFF;
-    static constexpr char WDuplicate =
-        0x01; // duplicate sentence found and will be ignored
-    static constexpr char WUnused = 0x02; // unused variables
-    static constexpr char WReAssign = 0x04; // variable re assigned
+    static const char Wall;
+    static const char WDuplicate; // duplicate sentence found and will be ignored
+    static const char WUnused;// unused variables
+    static const char WReAssign; // variable re assigned
+
 
     /***************************************************
      * Invokes parseFile and thus can throw exceptions *
      ***************************************************/
     ConfigurationParser( const boost::filesystem::path &file,
-                         std::shared_ptr<ILogger> logger, const warningLevel_t warnings = Wall );
+                         std::shared_ptr<ILogger> logger, const warningLevel_t warnings = 0 );
 
     ConfigurationParser( std::shared_ptr<ILogger> logger,
-                         const warningLevel_t warnings );
+                         const warningLevel_t warnings = 0 );
     /**********************************************************************
      * Parses a configuration file. A configuration can be parsed         *
      * from more than one configuration file, duplicate variables will be *

@@ -17,7 +17,7 @@ Microphone::Microphone( const double sampleRate,
     /******************************************************************************
      *  One input stream, 0 output streams, signed 16-bit samples, ..., userData. *
      ******************************************************************************/
-    err = Pa_OpenDefDefaultStream( &stream, 1, 0, paInt16, sampleRate_,
+    err = Pa_OpenDefaultStream( &stream, 1, 0, paInt16, sampleRate_,
                                    framesPerBuffer_, callbacks::capturingCallback, this );
 
     if ( err != paNoError ) {

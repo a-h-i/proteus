@@ -15,6 +15,12 @@ static const boost::regex VAR_REF ( VAR_REF_REGEX );
 
 using namespace gen::parsing;
 
+const char ConfigurationParser::Wall = 0xFF;
+const  char ConfigurationParser::WDuplicate =
+    0x01; // duplicate sentence found and will be ignored
+const char ConfigurationParser::WUnused = 0x02; // unused variables
+const char ConfigurationParser::WReAssign = 0x04; // variable re assigned
+
 ConfigurationParser::ConfigurationParser( std::shared_ptr<ILogger> logger,
         const warningLevel_t warnings ) :
     logger( logger ),  error_( false ), warnLevel( warnings ) {}
@@ -130,7 +136,7 @@ void ConfigurationParser::handleSentence( boost::smatch &result,
         auto sent = std::make_shared<std::string>( utterance ); // actual sentence
         boost::trim( *sent );
 
-        
+
         // handle variables
         auto formatter = [this, &sent]( const boost::smatch & r ) -> std::string {
             std::string identifier = r[1];
@@ -145,6 +151,7 @@ void ConfigurationParser::handleSentence( boost::smatch &result,
         };
 
         *sent = boost::regex_replace( *sent, VAR_REF, boost::ref( formatter ) );
+
         // check if exists
         if ( sents_.count( sent ) == 0 ) {
             sents_.insert( sent );
@@ -158,8 +165,8 @@ void ConfigurationParser::handleSentence( boost::smatch &result,
             }
         }
 
-    }else {
+    } else {
         *logger << "Warning: Empty sentance will be ignored @" << file.generic_string()
-                        << ":" << lineNumber << '\n'; 
+                << ":" << lineNumber << '\n';
     }
 }
