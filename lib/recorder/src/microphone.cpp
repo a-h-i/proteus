@@ -1,11 +1,11 @@
-#include "microphone.hpp"
-#include "../prot.hpp"
+#include "../microphone.hpp"
+#include "../../recognizer.hpp"
 #include <string>
 
 using namespace proteus::utility;
 
 
-Microphone::Microphone(Prot *userData, const double sampleRate,
+Microphone::Microphone(Recognizer *userData, const double sampleRate,
                         const unsigned long framesPerBuffer ) : sampleRate_( sampleRate ),
     framesPerBuffer_( framesPerBuffer ), recording(false) {
     PaError err = Pa_Initialize();

@@ -1,4 +1,4 @@
-#include "grammar.hpp"
+#include "../grammar.hpp"
 #include <unordered_set>
 #include <type_traits>
 #include <numeric>

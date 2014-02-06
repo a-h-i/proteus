@@ -1,9 +1,9 @@
 #ifdef DEBUG_ME_SOFTLY
 
-#include "catch.hpp"
-#include "../ui/basicConsoleLogger.hpp"
-#include "../generator/grammar.hpp"
-#include "../generator/parser.hpp"
+#include "../catch.hpp"
+#include "../../ui/basicConsoleLogger.hpp"
+#include "../../generator/grammar.hpp"
+#include "../../generator/parser.hpp"
 #include <list>
 #include <memory>
 #include <string>
@@ -12,7 +12,7 @@
 
 TEST_CASE( "NON OPTIMIZED GRAMMAR", "[grammar]" ) {
     std::shared_ptr<ILogger> logger = std::make_shared<BasicConsoleLogger>();
-    const std::string simpleTest = "src/tests/simpletest.cfg";
+    const std::string simpleTest = "tool/tests/simpletest.cfg";
     gen::parsing::ConfigurationParser p( simpleTest, logger, 0 );
     REQUIRE_FALSE( p.error() );
     gen::grammar::Grammar g( p.sentences() );
@@ -22,7 +22,7 @@ TEST_CASE( "NON OPTIMIZED GRAMMAR", "[grammar]" ) {
 
 TEST_CASE( "OPTIMIZED GRAMMAR", "[grammar]" ) {
     std::shared_ptr<ILogger> logger = std::make_shared<BasicConsoleLogger>();
-    const std::string simpleTest = "src/tests/simpletest.cfg";
+    const std::string simpleTest = "tool/tests/simpletest.cfg";
     gen::parsing::ConfigurationParser p( simpleTest, logger, 0 );
     REQUIRE_FALSE( p.error() );
     gen::grammar::Grammar g( p.sentences() );
@@ -34,7 +34,7 @@ TEST_CASE( "OPTIMIZED GRAMMAR", "[grammar]" ) {
 
 TEST_CASE( "JSGF OUTPUT", "[grammar]" ) {
     std::shared_ptr<ILogger> logger = std::make_shared<BasicConsoleLogger>();
-    const std::string simpleTest = "src/tests/simpletest.cfg";
+    const std::string simpleTest = "tool/tests/simpletest.cfg";
 
     SECTION( "NON OPTIMIZED GRAMMAR" ) {
         gen::parsing::ConfigurationParser p( simpleTest, logger, 0 );

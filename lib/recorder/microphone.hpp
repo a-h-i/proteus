@@ -1,8 +1,8 @@
 #pragma once
 #include <portaudio.h>
-#include "../common/exceptions.hpp"
+#include "../exceptions.hpp"
 #include "callbacks.hpp"
-class Prot;
+class Recognizer;
 namespace proteus {
 namespace utility {
 
@@ -29,7 +29,7 @@ public:
      * Throws PortAudio exception if failed *
      * to Initialize PA.                    *
      ****************************************/
-    Microphone(Prot *, const double sampleRate = 8192.0, const unsigned long framesPerBuffer = 4096);
+    Microphone(Recognizer *, const double sampleRate = 8192.0, const unsigned long framesPerBuffer = 4096);
     double sampleRate() { return sampleRate_;}
     unsigned long framesPerBuffer(){return framesPerBuffer_;}
     void start();

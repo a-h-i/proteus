@@ -1,14 +1,14 @@
 #ifdef DEBUG_ME_SOFTLY
 #define CATCH_CONFIG_MAIN
-#include "../tests/catch.hpp"
+#include "../../tests/catch.hpp"
 
 #else
 
-#include "../generator/grammar.hpp"
-#include "../generator/utility.hpp"
-#include "../generator/parser.hpp"
-#include "basicConsoleLogger.hpp"
-#include "exceptions.hpp"
+#include "../../generator/grammar.hpp"
+#include "../../common/utility.hpp"
+#include "../../generator/parser.hpp"
+#include "../basicConsoleLogger.hpp"
+#include "../../common/exceptions.hpp"
 #include <list>
 #include <bitset>
 #include <memory>
@@ -77,7 +77,7 @@ int main( int argc, const char *argv[] ) {
 
     try {
         opts = parseCommands( args );
-    } catch ( InvalidArgs &e ) {
+    } catch ( proteus::exceptions::InvalidArgs &e ) {
         *logger << "Unrecognized arguments:\n";
 
         for ( auto &arg : args ) {
@@ -89,13 +89,15 @@ int main( int argc, const char *argv[] ) {
     }
 
     if ( opts.good() ) {
-        auto parser = opts.createParser( logger );
-
+        try {
+            auto parser = opts.createParser( logger );
+   
         if ( parser.error() ) {
             // parser should have logged errors
             *logger << "\nConfiguration Failed\n";
             return -1;
         }
+
 
         // now create grammar
         gen::grammar::Grammar g( parser.sentences() );
@@ -124,6 +126,10 @@ int main( int argc, const char *argv[] ) {
 
         // now we have a fsg
         return 0;
+        }catch (proteus::exceptions::FileError &e) {
+            *logger << e.what();
+            return -1;
+        }
     } else {
         if ( !opts.checkComp( EXEC_DIR_BIT ) ) {
             *logger << "\nFatal Error: Could not locate my own executable !"
@@ -165,7 +171,7 @@ static Options parseCommands( std::list<std::string> &args ) {
         retriveWarningSetting( opts, args );
 
         if ( args.size() != 0 ) {
-            throw InvalidArgs( "Unrecognized command line options" );
+            throw proteus::exceptions::InvalidArgs( "Unrecognized command line options" );
         }
 
     }

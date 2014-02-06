@@ -22,22 +22,16 @@ debug['CXXFLAGS'] = '-Wall -Werror -std=c++11 -g -fPIE -DDEBUG_ME_SOFTLY'
 
 
 
-packages = ['src/generator', 'src/ui', 'src/tests']
+packages = ['tool/generator/src', 'tool/ui/src', 'tool/tests/src']
 
 # Objects
 d_objs = [make_package(debug, 'dbg', p) for p in packages]
 r_objs = [make_package(release, 'rel', p) for p in packages]
 
 
-
-
 # Targets
 d_target = debug.Program('proteus-dbg', d_objs)
 r_target = release.Program('proteus', r_objs)
-
-
-
-
 
 #library
 linkflags = ' `pkg-config --libs pocketsphinx` ' + ' `pkg-config --libs portaudio-2.0` -fpic'
@@ -45,7 +39,13 @@ linkflags = ' `pkg-config --libs pocketsphinx` ' + ' `pkg-config --libs portaudi
 libenv = Environment(CXX = 'clang++', ENV = {'PATH' : os.environ['PATH']}, LINKFLAGS=linkflags)
 libenv['ENV']['TERM'] = os.environ['TERM']
 libenv['CXXFLAGS'] = '-Wall -Werror -fpic -std=c++11 -O3   -I/usr/include/sphinxbase -I/usr/include/pocketsphinx -I/usr/include/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/sphinxbase '
-lib_packages = ['src/recognizer', 'src/recognizer/recorder']
+lib_packages = ['lib/src', 'lib/recorder/src']
 lib_objs = [make_package(libenv, 'lib', p) for p in lib_packages]
 l_target = libenv.SharedLibrary("proteus", lib_objs)
+
+
+
+#Aliases
 libenv.Alias('lib', [l_target])
+release.Alias('tool', [r_target])
+debug.Alias('debug', [d_target])

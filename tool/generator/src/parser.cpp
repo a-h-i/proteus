@@ -1,4 +1,4 @@
-#include "parser.hpp"
+#include "../parser.hpp"
 #include <set>
 #include <iterator>
 #include <boost/ref.hpp>
@@ -75,7 +75,7 @@ void ConfigurationParser::parseFile( const boost::filesystem::path &file ) {
             }
         }
     } else {
-        throw FileError( "Path: " + file.generic_string() + " is not a regular file" );
+        throw proteus::exceptions::FileError( "Path: " + file.generic_string() + " is not a regular file" );
     }
 }
 

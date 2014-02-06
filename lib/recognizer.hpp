@@ -22,34 +22,39 @@
 //                 ||     ||
 
 
-class Prot {
+class Recognizer {
     proteus::utility::Microphone mic;
     ps_decoder_t *ps;
     boost::lockfree::spsc_queue<std::int16_t> ringBuff;
     std::mutex m;
     std::condition_variable cv;
-    char * singleUttrHelper(const silencers::silencer_t &);
+    char *singleUttrHelper( const silencers::silencer_t & );
     void wait();
 public:
     const double SAMPLE_RATE; // advised to be atlease 8k
     const unsigned long FRAME_SIZE;
-    Prot( const std::string &grammar, const std::string &dict, double sampleRate,
-          unsigned long frameSize );
+    /****************************************
+     * Throws PortAudio exception if failed *
+     * to init microphone.                  *
+     ****************************************/
+    Recognizer( const std::string &grammar, const std::string &dict,
+                double sampleRate,
+                unsigned long frameSize );
     /***********************************
      * Provide a 'push to talk' method *
      ***********************************/
-    char *recogWord(const silencers::silencer_t &);
+    char *recogWord( const silencers::silencer_t & );
     /**************************************************
      * Called by subjects this instance is observing. *
      * so far only microphones.                       *
      * ************************************************/
-    void notify();    
+    void notify();
     /***************************
      * Adds data to buffer.    *
      * Operation is lock-free. *
      ***************************/
     void buffer( const std::int16_t *buff, std::size_t size );
-    ~Prot();
+    ~Recognizer();
 };
 
 

@@ -1,6 +1,6 @@
-#include "../prot.hpp"
-#include "callbacks.hpp"
-#include "microphone.hpp"
+#include "../../recognizer.hpp"
+#include "../callbacks.hpp"
+#include "../microphone.hpp"
 #include <cstdint>
 using namespace proteus::utility;
 
@@ -11,7 +11,7 @@ int callbacks::capturingCallback( const void *input,
                                   PaStreamCallbackFlags statusFlags,
                                   void *userData ) {
 
- Prot * p = reinterpret_cast<Prot *>(userData);
+ Recognizer * p = reinterpret_cast<Recognizer *>(userData);
  const std::int16_t * iptr = reinterpret_cast<const std::int16_t *>(input);
  p->buffer( iptr, frameCount); // lockfree 
  p->notify();

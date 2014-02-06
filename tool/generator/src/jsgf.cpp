@@ -1,4 +1,4 @@
-#include "grammar.hpp"
+#include "../grammar.hpp"
 using namespace gen::grammar;
 
 std::string printProduction(const production_t &p) {

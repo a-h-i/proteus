@@ -1,7 +1,7 @@
 #pragma once
 #include "symtable.hpp"
 #include "typedefs.hpp"
-#include "exceptions.hpp"
+#include "../common/exceptions.hpp"
 #include "../ui/ilogger.hpp"
 #include <memory>
 #include <string>

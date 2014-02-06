@@ -90,11 +90,11 @@ std::string createJSGF( const Grammar &g, const std::string &name );
 }
 namespace optimizers {
 
-/*****
- * Consumes parameter productions.
- * returns the optimized production.
- * Performs simple right and left factoring.
- */
+/*********************************************
+ * Consumes parameter productions.           *
+ * returns the optimized production.         *
+ * Performs simple right and left factoring. *
+ *********************************************/
 grammar::production_t simpleFactoringOptimizer( std::list<grammar::production_t>
         &productions );
 }
