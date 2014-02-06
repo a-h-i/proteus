@@ -4,13 +4,14 @@
 
 #else
 
-#include "../../generator/grammar.hpp"
-#include "../../common/utility.hpp"
-#include "../../generator/parser.hpp"
 #include "../basicConsoleLogger.hpp"
 #include "../../common/exceptions.hpp"
+#include "../../common/utility.hpp"
+#include "../../generator/grammar.hpp"
+#include "../../generator/parser.hpp"
 #include <list>
 #include <bitset>
+#include <cstdio>
 #include <memory>
 #include <vector>
 #include <iterator>
@@ -90,43 +91,44 @@ int main( int argc, const char *argv[] ) {
 
     if ( opts.good() ) {
         try {
+            // Now parse configuration file to create grammar
             auto parser = opts.createParser( logger );
-   
-        if ( parser.error() ) {
-            // parser should have logged errors
-            *logger << "\nConfiguration Failed\n";
-            return -1;
-        }
+
+            if ( parser.error() ) {
+                // parser should have logged errors
+                *logger << "\nConfiguration Failed\n";
+                return -1;
+            }
 
 
-        // now create grammar
-        gen::grammar::Grammar g( parser.sentences() );
+            // now create grammar
+            gen::grammar::Grammar g( parser.sentences() );
 
-        g.optimize( gen::optimizers::simpleFactoringOptimizer );
+            g.optimize( gen::optimizers::simpleFactoringOptimizer );
 
-        std::string randomName;
+            std::string randomName;
 
-        do {
-            randomName = gen::generateRandomString( GRAMMAR_NAME_LENGTH );
-            // generate a not in use file name (relative to working directory)
-        } while ( ( bfs::exists( randomName + ".jsgf" ) )
-                  || ( bfs::exists( randomName + ".fsg" ) ) );
+            do {
+                randomName = gen::generateRandomString( GRAMMAR_NAME_LENGTH );
+                // generate a not in use file name (relative to working directory)
+            } while ( ( bfs::exists( randomName + ".jsgf" ) )
+                      || ( bfs::exists( randomName + ".fsg" ) ) );
 
-        std::string jsgfGrammar = gen::grammar::createJSGF( g, "optSimple" );
-        const std::string jsgfName = randomName + ".jsgf";
-        const std::string fsgName = randomName + ".fsg";
-        std::ofstream outFile( jsgfName );
-        outFile << jsgfGrammar;
-        outFile.flush();
-        // Now we need to convert it to a fsg
+            std::string jsgfGrammar = gen::grammar::createJSGF( g, randomName );
+            const std::string jsgfName = randomName + ".jsgf";
+            const std::string fsgName = randomName + ".fsg";
+            std::ofstream outFile( jsgfName );
+            outFile << jsgfGrammar;
+            outFile.flush();
+            // Now we need to convert the jsgf to a fsg
+            const std::string converter( "sphinx_jsgf2fsg" );
 
-        const std::string converter( "sphinx_jsgf2fsg" );
+            system( ( converter + " -jsgf " + jsgfName + " -fsg " + fsgName ).c_str() );
 
-        system((converter + " -jsgf " + jsgfName + " -fsg " + fsgName).c_str());
-
-        // now we have a fsg
-        return 0;
-        }catch (proteus::exceptions::FileError &e) {
+            // now we have a fsg thats good to go.
+            std::remove(jsgfName.c_str()); // delete jsgf
+            return 0;
+        } catch ( proteus::exceptions::FileError &e ) {
             *logger << e.what();
             return -1;
         }
