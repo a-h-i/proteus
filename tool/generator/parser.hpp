@@ -18,9 +18,9 @@ namespace parsing {
 
 
 class ConfigurationParser {
-    std::shared_ptr<ILogger> logger;
-    std::unordered_map<sentence_t, id_t, sentValueHash, sentValueEq> map_;
-    std::unordered_set<sentence_t, sentValueHash, sentValueEq> sents_;
+    logger_ptr_t logger;
+    std::unordered_map<sentence_t, id_t> map_;
+    std::unordered_set<sentence_t> sents_;
     SymTable syms;
     bool error_;
 public:
@@ -35,9 +35,9 @@ public:
      * Invokes parseFile and thus can throw exceptions *
      ***************************************************/
     ConfigurationParser( const boost::filesystem::path &file,
-                         std::shared_ptr<ILogger> logger, const warningLevel_t warnings = 0 );
+                         logger_ptr_t logger, const warningLevel_t warnings = 0 );
 
-    ConfigurationParser( std::shared_ptr<ILogger> logger,
+    ConfigurationParser( logger_ptr_t logger,
                          const warningLevel_t warnings = 0 );
     /**********************************************************************
      * Parses a configuration file. A configuration can be parsed         *
@@ -92,14 +92,14 @@ void print( Stream &&s, const ConfigurationParser &conf ) {
       << "\nSentences:\n";
 
     for ( auto &sent : conf.sentences() ) {
-        s << *sent << '\n';
+        s << sent << '\n';
     }
 
 
     s << "(Sentence , ID) pairs:\n";
 
     for (  auto &siPair : conf.map() ) {
-        s << "( " << *( siPair.first ) << " , "
+        s << "( " <<  siPair.first  << " , "
           << siPair.second << " )\n";
     }
 }

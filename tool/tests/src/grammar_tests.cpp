@@ -11,9 +11,9 @@
 
 
 TEST_CASE( "NON OPTIMIZED GRAMMAR", "[grammar]" ) {
-    std::shared_ptr<ILogger> logger = std::make_shared<BasicConsoleLogger>();
+    std::unique_ptr<ILogger> logger(new BasicConsoleLogger) ;
     const std::string simpleTest = "tool/tests/simpletest.cfg";
-    gen::parsing::ConfigurationParser p( simpleTest, logger, 0 );
+    gen::parsing::ConfigurationParser p( simpleTest, logger.get(), 0 );
     REQUIRE_FALSE( p.error() );
     gen::grammar::Grammar g( p.sentences() );
     *logger << "\nGrammar from file " << simpleTest << ":\n";
@@ -21,9 +21,9 @@ TEST_CASE( "NON OPTIMIZED GRAMMAR", "[grammar]" ) {
 }
 
 TEST_CASE( "OPTIMIZED GRAMMAR", "[grammar]" ) {
-    std::shared_ptr<ILogger> logger = std::make_shared<BasicConsoleLogger>();
+    std::unique_ptr<ILogger> logger(new BasicConsoleLogger);
     const std::string simpleTest = "tool/tests/simpletest.cfg";
-    gen::parsing::ConfigurationParser p( simpleTest, logger, 0 );
+    gen::parsing::ConfigurationParser p( simpleTest, logger.get(), 0 );
     REQUIRE_FALSE( p.error() );
     gen::grammar::Grammar g( p.sentences() );
     *logger << "\nGrammar from file " << simpleTest << ":\n";
@@ -33,11 +33,11 @@ TEST_CASE( "OPTIMIZED GRAMMAR", "[grammar]" ) {
 }
 
 TEST_CASE( "JSGF OUTPUT", "[grammar]" ) {
-    std::shared_ptr<ILogger> logger = std::make_shared<BasicConsoleLogger>();
+    std::unique_ptr<ILogger> logger(new BasicConsoleLogger);
     const std::string simpleTest = "tool/tests/simpletest.cfg";
 
     SECTION( "NON OPTIMIZED GRAMMAR" ) {
-        gen::parsing::ConfigurationParser p( simpleTest, logger, 0 );
+        gen::parsing::ConfigurationParser p( simpleTest, logger.get(), 0 );
         REQUIRE_FALSE( p.error() );
         gen::grammar::Grammar g( p.sentences() );
         *logger << "\nNon Omptimized:\n";
@@ -48,7 +48,7 @@ TEST_CASE( "JSGF OUTPUT", "[grammar]" ) {
     }
 
     SECTION( "OPTIMIZED GRAMMAR" ) {
-        gen::parsing::ConfigurationParser p( simpleTest, logger, 0 );
+        gen::parsing::ConfigurationParser p( simpleTest, logger.get(), 0 );
         REQUIRE_FALSE( p.error() );
         gen::grammar::Grammar g( p.sentences() );
         REQUIRE_NOTHROW( g.optimize( gen::optimizers::simpleFactoringOptimizer ) );

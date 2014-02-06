@@ -1,5 +1,6 @@
 #pragma once
 #include "../common/exceptions.hpp"
+#include "../generator/typedefs.hpp"
 #include <boost/filesystem/fstream.hpp>
 #include <memory>
 

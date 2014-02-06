@@ -22,22 +22,22 @@ using namespace emitter;
 
 class Stuff {
 
-    std::list<std::shared_ptr<std::string>> sentences_;
+    std::list<gen::sentence_t> sentences_;
     bool sentencesInitialzed;
 public:
     const bfs::path dict, grammar;
     bfs::ifstream input;
     std::list<std::unique_ptr<Emission>> seq;
     sent_map_t *const map;
-    const std::shared_ptr<ILogger> logger;
+    const logger_ptr_t logger;
     
 
     Stuff( const bfs::path &dict, const bfs::path &grammar,
            const bfs::path templateFile, sent_map_t *map,
-           const std::shared_ptr<ILogger> &logger ) :sentencesInitialzed(false), dict( dict ),
+           const logger_ptr_t &logger ) :sentencesInitialzed(false), dict( dict ),
         grammar( grammar ), input( templateFile ), map( map ), logger( logger ) {}
 
-    std::list<std::shared_ptr<std::string>> & sentences() {
+    std::list<gen::sentence_t> & sentences() {
         // initialize if needed
         if(sentencesInitialzed) {
             return sentences_;
@@ -58,8 +58,8 @@ static std::string replaceVariables( Stuff &data, const std::string &text ) {
     out = boost::regex_replace( out, wantTheDictionary,
                                 data.dict.generic_string() );
     auto formatter = [&data]( const boost::smatch & s ) -> std::string {
-        if ( data.map->count( std::make_shared<std::string>(s[1]) ) != 0 ) {
-            return data.map->at( std::make_shared<std::string>(s[1]) );
+        if ( data.map->count( s[1] ) != 0 ) {
+            return data.map->at( s[1] );
         } else {
             *( data.logger ) << "\nWARNING: COULD NOT FIND ID-OF : " << s[1] << '\n';
             return s[0]; // return original
@@ -116,7 +116,7 @@ void handleFile( Stuff &data, const std::string fileName ) {
 std::list<std::unique_ptr<Emission>>  emitter::createSequence(
                                       const bfs::path &templateFile, const bfs::path &dict,
                                       const bfs::path &grammar, sent_map_t *const map,
-                                      std::shared_ptr<ILogger> &logger ) {
+                                      logger_ptr_t &logger ) {
     Stuff  data( dict, grammar, templateFile, map, logger ); // We need our stuffz
 
     //We begin parsing ! currently only file blocks are supported

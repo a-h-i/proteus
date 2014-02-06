@@ -21,12 +21,12 @@ const  char ConfigurationParser::WDuplicate =
 const char ConfigurationParser::WUnused = 0x02; // unused variables
 const char ConfigurationParser::WReAssign = 0x04; // variable re assigned
 
-ConfigurationParser::ConfigurationParser( std::shared_ptr<ILogger> logger,
+ConfigurationParser::ConfigurationParser( logger_ptr_t logger,
         const warningLevel_t warnings ) :
     logger( logger ),  error_( false ), warnLevel( warnings ) {}
 
 ConfigurationParser::ConfigurationParser( const boost::filesystem::path &file,
-        std::shared_ptr<ILogger> logger ,
+        logger_ptr_t logger ,
         const warningLevel_t warnings ) : ConfigurationParser( logger, warnings ) {
     parseFile( file );
 }
@@ -116,9 +116,9 @@ void ConfigurationParser::fillDependecies( const std::string &identifier ) {
     };
 
     // Iterate over dependecies and fill them
-    for ( auto &sentPtr : *depsPtr ) {
+    for ( auto &sent : *depsPtr ) {
 
-        *sentPtr = boost::regex_replace( *sentPtr, VAR_REF, boost::ref( formatter ) );
+        sent = boost::regex_replace( sent, VAR_REF, boost::ref( formatter ) );
     }
 }
 
@@ -133,29 +133,29 @@ void ConfigurationParser::handleSentence( boost::smatch &result,
     if ( !utterance.empty() ) {
         //TODO: check syntax
 
-        auto sent = std::make_shared<std::string>( utterance ); // actual sentence
-        boost::trim( *sent );
+         // actual sentence
+        
 
 
         // handle variables
-        auto formatter = [this, &sent]( const boost::smatch & r ) -> std::string {
+        auto formatter = [this, &utterance]( const boost::smatch & r ) -> std::string {
             std::string identifier = r[1];
 
             if ( syms.contains( identifier ) ) {
                 syms[identifier].used = true;
                 return syms[identifier].value; // replace
             } else {
-                syms.addDep( sent, identifier ); // forward declare
+                syms.addDep( utterance, identifier ); // forward declare
                 return r[0];// keep original
             }
         };
 
-        *sent = boost::regex_replace( *sent, VAR_REF, boost::ref( formatter ) );
+        utterance = boost::regex_replace( utterance, VAR_REF, boost::ref( formatter ) );
 
         // check if exists
-        if ( sents_.count( sent ) == 0 ) {
-            sents_.insert( sent );
-            map_[sent] = result[2];
+        if ( sents_.count( utterance ) == 0 ) {
+            sents_.insert( utterance );
+            map_[utterance] = result[2];
 
         } else {
             //ignore new definition

@@ -11,11 +11,11 @@ namespace emitter {
 class RepeatingEmission : public Emission {
     const std::string mold;
     const boost::regex pattern;
-    std::list<std::shared_ptr<std::string>> range;
+    std::list<gen::sentence_t > range;
 public:
     RepeatingEmission( const std::shared_ptr<bfs::ofstream>  &file,
                        const std::string &mold, const boost::regex &pattern,
-                       const std::list<std::shared_ptr<std::string>> &range ) : Emission( file ),
+                       const std::list<gen::sentence_t> &range ) : Emission( file ),
         mold( mold ), pattern( pattern ), range( range ) {}
         void emit() override;
 };

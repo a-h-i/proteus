@@ -33,6 +33,7 @@ class Options {
     bfs::path execDir;
     std::list<bfs::path> confFiles;
     gen::parsing::ConfigurationParser::warningLevel_t warnLevel;
+    std::string tempFile;
 public:
     Options() : warnLevel( 0 ) {}
     void setExecDir( const std::string &p ) {
@@ -53,7 +54,7 @@ public:
     bool good() {
         return bits.all();
     }
-    gen::parsing::ConfigurationParser createParser( const std::shared_ptr<ILogger>
+    gen::parsing::ConfigurationParser createParser( const logger_ptr_t
             &logger ) {
         gen::parsing::ConfigurationParser p( logger, warnLevel );
 
@@ -63,6 +64,9 @@ public:
 
         return p;
     }
+    void setTempFile(const std::string & str) {
+        tempFile = str;
+    }
 };
 
 static Options parseCommands( std::list<std::string> & );
@@ -70,12 +74,14 @@ static std::list<std::string> convertArgs( const int argc,
         const char *const *const argv );
 static void retriveConfFiles( Options &, std::list<std::string> & );
 static void retriveWarningSetting( Options &, std::list<std::string> & );
+static void retriveTemplateFile( Options &, std::list<std::string> & );
+
+
+std::unique_ptr<ILogger> logger (new BasicConsoleLogger());
 
 int main( int argc, const char *argv[] ) {
-    std::shared_ptr<ILogger> logger = std::make_shared<BasicConsoleLogger>();
     std::list<std::string> args = convertArgs( argc, argv );
     Options opts;
-
     try {
         opts = parseCommands( args );
     } catch ( proteus::exceptions::InvalidArgs &e ) {
@@ -92,7 +98,7 @@ int main( int argc, const char *argv[] ) {
     if ( opts.good() ) {
         try {
             // Now parse configuration file to create grammar
-            auto parser = opts.createParser( logger );
+            auto parser = opts.createParser( logger.get() );
 
             if ( parser.error() ) {
                 // parser should have logged errors
@@ -171,7 +177,7 @@ static Options parseCommands( std::list<std::string> &args ) {
         // get configuration files
         retriveConfFiles( opts, args );
         retriveWarningSetting( opts, args );
-
+        retriveTemplateFile(opts, args);
         if ( args.size() != 0 ) {
             throw proteus::exceptions::InvalidArgs( "Unrecognized command line options" );
         }
@@ -220,4 +226,20 @@ static void retriveConfFiles( Options &opts, std::list<std::string> &args ) {
     }
 }
 
+static void retriveTemplateFile( Options &opts, std::list<std::string> &args ) {
+    bool found = false;
+    for ( auto it = args.begin(); it != args.end(); ++it ) {
+        if ( boost::ends_with( *it, ".prot" ) ) {
+            if(!found) {
+                opts.setTempFile( *it );                
+                found = true;
+            }else {
+                *logger << "\nWarning Will ignore extra template file: " << *it
+                << '\n';
+            }
+
+            it = eraseItr( it, args );
+        }
+    }
+}
 #endif

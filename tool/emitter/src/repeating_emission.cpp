@@ -4,7 +4,7 @@ void emitter::RepeatingEmission::emit() {
     if(file->good()) {
 
         while(!range.empty()) {
-            boost::regex_replace(std::ostream_iterator<char>(*file), mold.begin(), mold.end(), pattern, *range.front());
+            boost::regex_replace(std::ostream_iterator<char>(*file), mold.begin(), mold.end(), pattern, range.front());
             range.pop_front();
         }
 

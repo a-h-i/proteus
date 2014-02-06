@@ -16,3 +16,5 @@ struct ILogger {
     }
     virtual ~ILogger(){}
 };
+
+typedef ILogger * logger_ptr_t;
