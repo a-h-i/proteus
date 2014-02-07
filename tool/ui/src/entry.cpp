@@ -3,7 +3,7 @@
 #include "../../tests/catch.hpp"
 
 #else
-
+#include "../../emitter/template.hpp"
 #include "../basicConsoleLogger.hpp"
 #include "../../common/exceptions.hpp"
 #include "../../common/utility.hpp"
@@ -16,18 +16,18 @@
 #include <vector>
 #include <iterator>
 #include <iostream>
-#include <boost/process.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace bfs = boost::filesystem;
-namespace bp = boost::process;
+
 
 #define OPTIONS_BITS 2
 #define EXEC_DIR_BIT 0
 #define CONFIGURATION_BIT 1
 #define GRAMMAR_NAME_LENGTH 15
 
+std::unique_ptr<ILogger> logger (new BasicConsoleLogger());
 class Options {
     std::bitset<OPTIONS_BITS> bits;
     bfs::path execDir;
@@ -35,6 +35,8 @@ class Options {
     gen::parsing::ConfigurationParser::warningLevel_t warnLevel;
     std::string tempFile;
 public:
+	std::string dictFile;
+	std::string gramFile;
     Options() : warnLevel( 0 ) {}
     void setExecDir( const std::string &p ) {
         execDir = p;
@@ -67,6 +69,11 @@ public:
     void setTempFile(const std::string & str) {
         tempFile = str;
     }
+    void genAPI( const std::unordered_map<gen::sentence_t, gen::id_t>  map) {
+    	if(!tempFile.empty()) {
+    		auto elist = emitter::createSequence(tempFile, dictFile, gramFile, &map, logger.get() );
+    	}
+    }
 };
 
 static Options parseCommands( std::list<std::string> & );
@@ -77,7 +84,7 @@ static void retriveWarningSetting( Options &, std::list<std::string> & );
 static void retriveTemplateFile( Options &, std::list<std::string> & );
 
 
-std::unique_ptr<ILogger> logger (new BasicConsoleLogger());
+
 
 int main( int argc, const char *argv[] ) {
     std::list<std::string> args = convertArgs( argc, argv );
@@ -133,6 +140,8 @@ int main( int argc, const char *argv[] ) {
 
             // now we have a fsg thats good to go.
             std::remove(jsgfName.c_str()); // delete jsgf
+            // generate template
+			opts.genAPI(parser.getFinalMap());            
             return 0;
         } catch ( proteus::exceptions::FileError &e ) {
             *logger << e.what();

@@ -42,7 +42,7 @@ public:
     Grammar( const Container &sentences ) {
         for ( const auto &s : sentences ) {
             productions_.emplace_back(); // create default constructed production at end
-            boost::split( productions_.back(), s, boost::is_any_of( " " ) );
+            boost::split( productions_.back(), *s, boost::is_any_of( " " ) ); // tokenize
         }
     }
     void optimize( optimizer_t o ) {

@@ -28,13 +28,13 @@ public:
     const bfs::path dict, grammar;
     bfs::ifstream input;
     std::list<std::unique_ptr<Emission>> seq;
-    sent_map_t *const map;
+    const sent_map_t *const map;
     const logger_ptr_t logger;
     
 
     Stuff( const bfs::path &dict, const bfs::path &grammar,
-           const bfs::path templateFile, sent_map_t *map,
-           const logger_ptr_t &logger ) :sentencesInitialzed(false), dict( dict ),
+           const bfs::path templateFile, const sent_map_t * const map,
+           const logger_ptr_t logger ) :sentencesInitialzed(false), dict( dict ),
         grammar( grammar ), input( templateFile ), map( map ), logger( logger ) {}
 
     std::list<gen::sentence_t> & sentences() {
@@ -115,8 +115,8 @@ void handleFile( Stuff &data, const std::string fileName ) {
 
 std::list<std::unique_ptr<Emission>>  emitter::createSequence(
                                       const bfs::path &templateFile, const bfs::path &dict,
-                                      const bfs::path &grammar, sent_map_t *const map,
-                                      logger_ptr_t &logger ) {
+                                      const bfs::path &grammar, const sent_map_t *const map,
+                                      logger_ptr_t logger ) {
     Stuff  data( dict, grammar, templateFile, map, logger ); // We need our stuffz
 
     //We begin parsing ! currently only file blocks are supported

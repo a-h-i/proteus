@@ -19,8 +19,8 @@ namespace parsing {
 
 class ConfigurationParser {
     logger_ptr_t logger;
-    std::unordered_map<sentence_t, id_t> map_;
-    std::unordered_set<sentence_t> sents_;
+    std::unordered_map<sentence_ptr_t, id_t, sentValueHash, sentValueEq> map_;
+    std::unordered_set<sentence_ptr_t, sentValueHash, sentValueEq> sents_;
     SymTable syms;
     bool error_;
 public:
@@ -62,6 +62,13 @@ public:
     auto  map() const -> const decltype(  map_ ) & {
         return map_;
     }
+    sent_map_t getFinalMap() {
+        sent_map_t finalForm;
+        for(auto pair : map_ ) {
+            finalForm[*pair.first] = pair.second;
+        }
+        return finalForm;
+    }
 
 private:
     warningLevel_t warnLevel;
@@ -92,14 +99,14 @@ void print( Stream &&s, const ConfigurationParser &conf ) {
       << "\nSentences:\n";
 
     for ( auto &sent : conf.sentences() ) {
-        s << sent << '\n';
+        s << *sent << '\n';
     }
 
 
     s << "(Sentence , ID) pairs:\n";
 
     for (  auto &siPair : conf.map() ) {
-        s << "( " <<  siPair.first  << " , "
+        s << "( " <<  *siPair.first  << " , "
           << siPair.second << " )\n";
     }
 }

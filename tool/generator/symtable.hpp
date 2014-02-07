@@ -30,7 +30,7 @@ struct Entry {
 
 class SymTable {
     std::unordered_map<std::string, Entry> table;
-    std::unordered_map<std::string, std::shared_ptr<std::list<sentence_t>> > deps;
+    std::unordered_map<std::string, std::shared_ptr<std::list<sentence_ptr_t>> > deps;
 public:
 
     /*************************************************
@@ -55,9 +55,9 @@ public:
         deps.erase( identifier );
     }
 
-    void addDep( sentence_t &sent, const std::string &identifier ) {
+    void addDep( sentence_ptr_t &sent, const std::string &identifier ) {
         if ( deps.count( identifier ) == 0 ) {
-            deps.emplace( identifier, std::make_shared<std::list<sentence_t>>() );
+            deps.emplace( identifier, std::make_shared<std::list<sentence_ptr_t>>() );
         }
 
         deps[identifier]->push_back( sent );
@@ -71,7 +71,7 @@ public:
                       bool remove = true ) -> typename
     std::remove_reference<decltype( deps[0] )>::type {
         if ( deps.count( identifier ) == 0 ) {
-            deps.emplace( identifier, std::make_shared<std::list<sentence_t>>() );
+            deps.emplace( identifier, std::make_shared<std::list<sentence_ptr_t>>() );
         }
 
         auto list = deps[identifier];
