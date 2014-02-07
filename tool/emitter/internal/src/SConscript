@@ -3,6 +3,6 @@ Import("tag")
 def make_objs(file_list, suffix, enviroment) :
     return [ enviroment.Object(file + '-' + suffix + '.o', file + '.cpp' ) for file in file_list ]
 
-files = Split('plain_text_emitter repeating_emitter template')
+files = Split('expansion_macro_state file_block_state template_parser tokens initial_state replace_variables')
 objs = make_objs(files, tag, env)
 Return('objs')

@@ -4,6 +4,7 @@
 #include <functional>
 #include <unordered_map>
 namespace gen {
+    
 typedef std::string id_t;
 typedef std::string sentence_t;
 typedef std::shared_ptr<sentence_t> sentence_ptr_t;

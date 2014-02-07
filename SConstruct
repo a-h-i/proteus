@@ -22,7 +22,7 @@ debug['CXXFLAGS'] = '-Wall -Werror -std=c++11 -g -fPIE -DDEBUG_ME_SOFTLY'
 
 
 
-packages = ['tool/generator/src', 'tool/ui/src', 'tool/tests/src', 'tool/emitter/src']
+packages = ['tool/generator/src', 'tool/ui/src', 'tool/tests/src', 'tool/emitter/src', 'tool/emitter/internal/src']
 
 # Objects
 d_objs = [make_package(debug, 'dbg', p) for p in packages]

@@ -35,8 +35,6 @@ class Options {
     gen::parsing::ConfigurationParser::warningLevel_t warnLevel;
     std::string tempFile;
 public:
-	std::string dictFile;
-	std::string gramFile;
     Options() : warnLevel( 0 ) {}
     void setExecDir( const std::string &p ) {
         execDir = p;
@@ -69,9 +67,11 @@ public:
     void setTempFile(const std::string & str) {
         tempFile = str;
     }
-    void genAPI( const std::unordered_map<gen::sentence_t, gen::id_t>  map) {
+    void genAPI( const std::unordered_map<gen::sentence_t, gen::id_t>  map, const std::string &dictFile, const std::string &gramFile) {
     	if(!tempFile.empty()) {
-    		auto elist = emitter::createSequence(tempFile, dictFile, gramFile, &map, logger.get() );
+            
+    		emitter::createSequence(tempFile, dictFile, gramFile, &map, logger.get() );
+          
     	}
     }
 };
@@ -136,12 +136,12 @@ int main( int argc, const char *argv[] ) {
             // Now we need to convert the jsgf to a fsg
             const std::string converter( "sphinx_jsgf2fsg" );
 
-            system( ( converter + " -jsgf " + jsgfName + " -fsg " + fsgName ).c_str() );
+            //system( ( converter + " -jsgf " + jsgfName + " -fsg " + fsgName ).c_str() );
 
             // now we have a fsg thats good to go.
             std::remove(jsgfName.c_str()); // delete jsgf
             // generate template
-			opts.genAPI(parser.getFinalMap());            
+			opts.genAPI(parser.getFinalMap(), "dict.dict" ,fsgName);            
             return 0;
         } catch ( proteus::exceptions::FileError &e ) {
             *logger << e.what();

@@ -1,21 +1,20 @@
 #pragma once
 #include "../common/exceptions.hpp"
 #include "../generator/typedefs.hpp"
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
 #include <memory>
 
 namespace emitter {
-namespace bfs = boost::filesystem;
-class Emission {
+class Emitter {
 protected:
-    std::shared_ptr<bfs::ofstream> file;
+    std::shared_ptr<std::ofstream> file;
 public:
-    Emission( const std::shared_ptr<bfs::ofstream>  &file ) : file( file ) {}
+    Emitter( const std::shared_ptr<std::ofstream>  &file ) : file( file ) {}
     /************************
-     * Throws EmissionError *
+     * Throws EmitterError *
      * if outstream is bad  *
      ************************/
     virtual void emit() = 0;
-    virtual ~Emission(){};
+    virtual ~Emitter(){};
 };
 }

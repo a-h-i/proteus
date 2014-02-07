@@ -14,9 +14,9 @@ public:
 InvalidArgs( const std::string &str ) noexcept: std::logic_error( str ) {}
 };
 
-class EmissionError : public std::logic_error {
+class EmitterError : public std::logic_error {
 public:
-    EmissionError(const std::string& str) noexcept: std::logic_error(str) {}
+    EmitterError(const std::string& str) noexcept: std::logic_error(str) {}
 };
 }
 }
