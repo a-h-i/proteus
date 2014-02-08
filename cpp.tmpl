@@ -1,0 +1,49 @@
+
+FILE lib.hpp BEGIN
+#include "proteus.hpp"
+#include <map>
+#include <string>
+#include <functional>
+class Recognizer {
+	prot_t backend;
+	std::map<std::string, std::string > word_id;
+	std::multimap<std::string, std::function<void(std::string &)>>  id_handler;
+	public:
+		Recognizer();
+		void recognize_one();
+		void register_callback(std::function<void(std::string &)> func, const std::string &id );
+		~Recognizer();
+};
+
+FILE END
+
+FILE lib.cpp BEGIN
+
+const char grammarFile = "THE_GRAMMAR";
+const char dictFile = "THE_DICT";
+
+#include "lib.hpp"
+Recognizer::Recognizer() {
+	backend = prot_init(grammarFile, dictFile);
+	// populate it
+	EXPAND_ME_BEGIN
+	word_id[std::string(COMMAND_EX)] = std::string(ID_EX);
+	EXPAND_ME_END
+}
+void recognize_one() {
+	char * hyp = recog_word( backend );
+	std::string hypStr(hyp);
+	delete[] hyp;
+	auto range = id_handler.equal_range(hypStr);
+	while(range.first != range.second) {
+		(range.first.second)(hypStr);
+		++range.first;
+	}
+}
+void Recognizer::register_callback(std::function<void(std::string &)> func, const std::string &id ){
+	id_handler.emplace(std::make_pair(id, func));
+}
+Recognizer::~Recognizer() {
+	void prot_free( backend );
+}
+FILE END
