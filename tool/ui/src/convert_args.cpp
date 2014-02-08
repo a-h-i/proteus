@@ -76,6 +76,18 @@ std::unordered_multimap<ui::OptionKey, std::string> ui::getConfiguration(std::li
         }else if(boost::ends_with( *it, ".tmpl" )) {
             config.emplace(OptionKey::TEMPLATE_FILES, *it );
             it = eraseItr( it, args );
+        }else if(*it == "-Wall") {
+            config.emplace(OptionKey::CONF_WARNINGS, *it);
+            it = eraseItr( it, args );
+        }else if(*it == "-WUnused") {
+            config.emplace(OptionKey::CONF_WARNINGS, *it);
+            it = eraseItr( it, args );
+        }else if (*it == "-WDuplicate") {
+           config.emplace(OptionKey::CONF_WARNINGS, *it);
+           it = eraseItr( it, args ); 
+        }else if(*it == "-WReAssign") {
+            config.emplace(OptionKey::CONF_WARNINGS, *it);
+            it = eraseItr( it, args );
         }else if (*it == "-h" | *it == "--help") {
             printHelp();
             throw proteus::exceptions::NoWorkException("help requested");
