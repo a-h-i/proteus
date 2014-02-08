@@ -29,16 +29,17 @@ public:
     static const char WDuplicate; // duplicate sentence found and will be ignored
     static const char WUnused;// unused variables
     static const char WReAssign; // variable re assigned
+    static const char DEFAULT_WARN;
 
 
     /***************************************************
      * Invokes parseFile and thus can throw exceptions *
      ***************************************************/
     ConfigurationParser( const boost::filesystem::path &file,
-                         logger_ptr_t logger, const warningLevel_t warnings = 0 );
+                         logger_ptr_t logger, const warningLevel_t warnings = DEFAULT_WARN );
 
     ConfigurationParser( logger_ptr_t logger,
-                         const warningLevel_t warnings = 0 );
+                         const warningLevel_t warnings = DEFAULT );
     /**********************************************************************
      * Parses a configuration file. A configuration can be parsed         *
      * from more than one configuration file, duplicate variables will be *

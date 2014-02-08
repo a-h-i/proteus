@@ -12,10 +12,11 @@ prot_t prot_init( const char *grammar, const char *dict ) {
 
 char *recog_word( prot_t p_ ) {
     // we want the threshold to be 42ish decibels
-    // silencer expects a decibel threshold
-    // with 0db being max thus we want -42 corresponding to about 0.01 of amplitude
+    // silencer expects an amplitude percentage threshold 
+    // we set it to 0.01 of amplitude
+
     static silencers::silencer_t silen = silencers::RMSSilencer(
-            -42.0 ); // I will have you know this is a well researched number
+            0.01 ); // I will have you know this is a well researched number
     Recognizer *p = reinterpret_cast<Recognizer *>( p_ );
     return p->recogWord( silen );
 }

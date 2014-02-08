@@ -20,7 +20,7 @@ const  char ConfigurationParser::WDuplicate =
     0x01; // duplicate sentence found and will be ignored
 const char ConfigurationParser::WUnused = 0x02; // unused variables
 const char ConfigurationParser::WReAssign = 0x04; // variable re assigned
-
+const char ConfigurationParser::DEFAULT = 0;
 ConfigurationParser::ConfigurationParser( logger_ptr_t logger,
         const warningLevel_t warnings ) :
     logger( logger ),  error_( false ), warnLevel( warnings ) {}

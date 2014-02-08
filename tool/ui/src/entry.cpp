@@ -9,17 +9,11 @@
 #include "../../common/utility.hpp"
 #include "../../generator/grammar.hpp"
 #include "../../generator/parser.hpp"
-#include <list>
-#include <bitset>
-#include <cstdio>
+#include "../arguments.hpp"
 #include <memory>
-#include <vector>
-#include <iterator>
-#include <iostream>
-#include <boost/filesystem.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 
-namespace bfs = boost::filesystem;
+
+
 
 
 #define OPTIONS_BITS 2
@@ -27,7 +21,7 @@ namespace bfs = boost::filesystem;
 #define CONFIGURATION_BIT 1
 #define GRAMMAR_NAME_LENGTH 15
 
-std::unique_ptr<ILogger> logger (new BasicConsoleLogger());
+
 class Options {
     std::bitset<OPTIONS_BITS> bits;
     bfs::path execDir;
@@ -64,191 +58,70 @@ public:
 
         return p;
     }
-    void setTempFile(const std::string & str) {
+    void setTempFile( const std::string &str ) {
         tempFile = str;
     }
-    void genAPI( const std::unordered_map<gen::sentence_t, gen::id_t>  map, const std::string &dictFile, const std::string &gramFile) {
-    	if(!tempFile.empty()) {
-            
-    		emitter::createSequence(tempFile, dictFile, gramFile, &map, logger.get() );
-          
-    	}
+    void genAPI( const std::unordered_map<gen::sentence_t, gen::id_t>  map,
+                 const std::string &dictFile, const std::string &gramFile ) {
+        if ( !tempFile.empty() ) {
+
+            emitter::createSequence( tempFile, dictFile, gramFile, &map, logger.get() );
+
+        }
     }
 };
 
-static Options parseCommands( std::list<std::string> & );
-static std::list<std::string> convertArgs( const int argc,
-        const char *const *const argv );
-static void retriveConfFiles( Options &, std::list<std::string> & );
-static void retriveWarningSetting( Options &, std::list<std::string> & );
-static void retriveTemplateFile( Options &, std::list<std::string> & );
 
+void handleConfiguration(logger_ptr_t logger, std::unordered_multimap<OptionKey, std::string> &args) {
+    using namespace ui;
+    using cp = gen::parsing::ConfigurationParser;    
+    cp::warningLevel_t warnLevel = cp::DEFAULT_WARN;
+    auto warnRange = args.equal_range(OptionKey::CONF_WARNINGS);
+    while(warnRange.first != warnRange.second) {
+        if(*warnRange.first == "-Wall") {
+            warnLevel |= cp::Wall;
+        }else if (*warnRange.first == "-WDuplicate") {
+            warnLevel |= cp::WDuplicate;
+        }else if (*warnRange.first == "-WUnused") {
+            warnLevel |= cp::WUnused;
+        }else if (*warnRange.first == "WReAssign") {
+            warnLevel |= cp::WReAssign;
+        }
+        ++warnRange.first;
+    }
+    cp parser(logger, warnLevel);
+    auto confRange = args.equal_range(OptionKey::CONFIGURATION_FILES);
+    while(confRange.first != confRange.second) {
+        parser.parseFile(*confRange.first);
+        ++confRange.first;
+    }
+    // now we generate the grammar
+       
+}
 
 
 
 int main( int argc, const char *argv[] ) {
-    std::list<std::string> args = convertArgs( argc, argv );
-    Options opts;
+    using namespace ui;
+    using namespace proteus::exceptions;
     try {
-        opts = parseCommands( args );
-    } catch ( proteus::exceptions::InvalidArgs &e ) {
-        *logger << "Unrecognized arguments:\n";
-
-        for ( auto &arg : args ) {
-            *logger << arg << ' ';
-        }
-
-        *logger << '\n';
-        return -1;
-    }
-
-    if ( opts.good() ) {
-        try {
-            // Now parse configuration file to create grammar
-            auto parser = opts.createParser( logger.get() );
-
-            if ( parser.error() ) {
-                // parser should have logged errors
-                *logger << "\nConfiguration Failed\n";
-                return -1;
-            }
-
-
-            // now create grammar
-            gen::grammar::Grammar g( parser.sentences() );
-
-            g.optimize( gen::optimizers::simpleFactoringOptimizer );
-
-            std::string randomName;
-
-            do {
-                randomName = gen::generateRandomString( GRAMMAR_NAME_LENGTH );
-                // generate a not in use file name (relative to working directory)
-            } while ( ( bfs::exists( randomName + ".jsgf" ) )
-                      || ( bfs::exists( randomName + ".fsg" ) ) );
-
-            std::string jsgfGrammar = gen::grammar::createJSGF( g, randomName );
-            const std::string jsgfName = randomName + ".jsgf";
-            const std::string fsgName = randomName + ".fsg";
-            std::ofstream outFile( jsgfName );
-            outFile << jsgfGrammar;
-            outFile.flush();
-            // Now we need to convert the jsgf to a fsg
-            const std::string converter( "sphinx_jsgf2fsg" );
-
-            //system( ( converter + " -jsgf " + jsgfName + " -fsg " + fsgName ).c_str() );
-
-            // now we have a fsg thats good to go.
-            std::remove(jsgfName.c_str()); // delete jsgf
-            // generate template
-			opts.genAPI(parser.getFinalMap(), "dict.dict" ,fsgName);            
-            return 0;
-        } catch ( proteus::exceptions::FileError &e ) {
-            *logger << e.what();
+        std::unique_ptr<ILogger> logger ( new BasicConsoleLogger() );
+        std::unordered_multimap<OptionKey, std::string> args = convertArgs( argc, argv );
+        if(args.count(CONFIGURATION_FILES) == 0) {
+            std::cerr << "Fatal Error: No configuration files specified.\n";
             return -1;
         }
-    } else {
-        if ( !opts.checkComp( EXEC_DIR_BIT ) ) {
-            *logger << "\nFatal Error: Could not locate my own executable !"
-                    << "\nPlease report this incident including OS info\n";
-        }
-
-        if ( !opts.checkComp( CONFIGURATION_BIT ) ) {
-            *logger << "\nFatal Error: No cinfiguration file provided\n"
-                    << "Configuration files must end with .cfg\n";
-        }
-
-        return -1;
-    }
-
-}
-
-static std::list<std::string> convertArgs( const int argc,
-        const char *const *const argv ) {
-    // preserves order
-    std::list<std::string> args;
-
-    for ( int i = 0; i < argc; i++ ) {
-        args.emplace_back( argv[i] );
-    }
-
-    return args;
-}
-static Options parseCommands( std::list<std::string> &args ) {
-    Options opts;
-
-    if ( args.size() >= 1 ) {
-        using namespace gen::parsing;
-
-        // execDir is first argument
-        opts.setExecDir ( args.front() );
-        args.pop_front();
-        // get configuration files
-        retriveConfFiles( opts, args );
-        retriveWarningSetting( opts, args );
-        retriveTemplateFile(opts, args);
-        if ( args.size() != 0 ) {
-            throw proteus::exceptions::InvalidArgs( "Unrecognized command line options" );
-        }
-
-    }
-
-    return opts;
-}
+        
+        const std::string dictFileName = "dict.dict";
+        std::string fsgGrammarFileName;
 
 
-template<typename It, typename Cont>
-It eraseItr( It it, Cont &c ) {
-    auto prev = std::prev( it, 1 );
-    c.erase( it );
-    return prev;
-}
-
-static void retriveWarningSetting( Options &opts,
-                                   std::list<std::string> &args ) {
-    using namespace gen::parsing;
-
-    for ( auto it = args.begin(); it != args.end(); ++it ) {
-        if ( *it == "-Wall" ) {
-            it = eraseItr( it, args );
-            opts.setWarnLevel( ConfigurationParser::Wall );
-        } else if ( *it == "-WDuplicate" ) {
-            it = eraseItr( it, args );
-            opts.setWarnLevel( ConfigurationParser::WDuplicate );
-        } else if ( *it == "-WUnused" ) {
-            it = eraseItr( it, args );
-            opts.setWarnLevel( ConfigurationParser::WUnused );
-        } else if ( *it == "-WReAssign" ) {
-            it = eraseItr( it, args );
-            opts.setWarnLevel( ConfigurationParser::WReAssign );
-        }
-    }
-
-}
-
-static void retriveConfFiles( Options &opts, std::list<std::string> &args ) {
-    for ( auto it = args.begin(); it != args.end(); ++it ) {
-        if ( boost::ends_with( *it, ".cfg" ) ) {
-            opts.addConfFile( *it );
-            it = eraseItr( it, args );
-        }
-    }
-}
-
-static void retriveTemplateFile( Options &opts, std::list<std::string> &args ) {
-    bool found = false;
-    for ( auto it = args.begin(); it != args.end(); ++it ) {
-        if ( boost::ends_with( *it, ".prot" ) ) {
-            if(!found) {
-                opts.setTempFile( *it );                
-                found = true;
-            }else {
-                *logger << "\nWarning Will ignore extra template file: " << *it
-                << '\n';
-            }
-
-            it = eraseItr( it, args );
-        }
+    }catch(InvalidArgs &e) {
+        std::cerr << "Unknown Option/Argument : " << e.what()
+                  << "\nUse proteus -h for help\n"
+    }catch(NoWorkException &e) {
+        // nothing to do
+        return 0;
     }
 }
 #endif

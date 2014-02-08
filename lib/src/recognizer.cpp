@@ -66,7 +66,7 @@ char *Recognizer::singleUttrHelper( const silencers::silencer_t &silen ) {
             } else {
                 return nullptr;
             }
-        } else if ( times >= 4 && !processedSomething ) {
+        } else if ( (times >= 4) & (!processedSomething) ) {
             ps_end_utt( ps );
             return nullptr;
         } else {

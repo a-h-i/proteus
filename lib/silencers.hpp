@@ -32,11 +32,7 @@ public:
         squareSum /= length;
         double rms = std::sqrt( squareSum );
 
-        // calculate decibel
-        // max db is 0
-        double db =  20.0 * std::log10( rms / 32767.0 );
-        return db <= threshold;
-
+        return threshold >= (rms / 32767.0);
     }
 };
 }
