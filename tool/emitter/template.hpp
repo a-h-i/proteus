@@ -6,7 +6,7 @@
 namespace emitter {
 
 using gen::sent_map_t;
-void createSequence( const std::string &templateFile, const std::string &dict,
+void processTemplate( const std::string &templateFile, const std::string &dict,
                      const std::string &grammar, const sent_map_t *const,
                      logger_ptr_t logger );
 }

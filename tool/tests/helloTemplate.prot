@@ -1,0 +1,11 @@
+
+
+
+
+FILE hello.cpp BEGIN
+    #include <iostream>
+    int main () {
+        std::cout << "THE_GRAMMAR\n THE_DICT\n";
+        return 0;
+    }
+FILE END

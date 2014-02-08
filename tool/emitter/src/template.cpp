@@ -1,6 +1,6 @@
 #include "../template.hpp"
 #include "../internal/template_parser.hpp"
-void emitter::createSequence( const std::string
+void emitter::processTemplate( const std::string
                                   &templateFile, const std::string &dict,
                                   const std::string &grammar, const sent_map_t * const map , 
                                   logger_ptr_t logger ) {

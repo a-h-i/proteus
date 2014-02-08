@@ -39,7 +39,7 @@ public:
                          logger_ptr_t logger, const warningLevel_t warnings = DEFAULT_WARN );
 
     ConfigurationParser( logger_ptr_t logger,
-                         const warningLevel_t warnings = DEFAULT );
+                         const warningLevel_t warnings = DEFAULT_WARN );
     /**********************************************************************
      * Parses a configuration file. A configuration can be parsed         *
      * from more than one configuration file, duplicate variables will be *

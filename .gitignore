@@ -8,7 +8,6 @@ Makefile
 *.exe
 proteus
 proteus-dbg
-*.jsgf
 *.fsg
 *.os
-*.prot
+

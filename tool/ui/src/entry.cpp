@@ -10,116 +10,97 @@
 #include "../../generator/grammar.hpp"
 #include "../../generator/parser.hpp"
 #include "../arguments.hpp"
+#include <string>
 #include <memory>
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 
+constexpr std::size_t GRAMMAR_NAME_LENGTH = 12;
 
-
-
-#define OPTIONS_BITS 2
-#define EXEC_DIR_BIT 0
-#define CONFIGURATION_BIT 1
-#define GRAMMAR_NAME_LENGTH 15
-
-
-class Options {
-    std::bitset<OPTIONS_BITS> bits;
-    bfs::path execDir;
-    std::list<bfs::path> confFiles;
-    gen::parsing::ConfigurationParser::warningLevel_t warnLevel;
-    std::string tempFile;
-public:
-    Options() : warnLevel( 0 ) {}
-    void setExecDir( const std::string &p ) {
-        execDir = p;
-        execDir.remove_filename();
-        bits.set( EXEC_DIR_BIT );
-    }
-    void addConfFile( const std::string &p ) {
-        confFiles.emplace_back( p );
-        bits.set( CONFIGURATION_BIT );
-    }
-    bool checkComp( std::size_t i ) {
-        return bits.test( i );
-    }
-    void setWarnLevel( const decltype( warnLevel ) &level ) {
-        warnLevel |= level;
-    }
-    bool good() {
-        return bits.all();
-    }
-    gen::parsing::ConfigurationParser createParser( const logger_ptr_t
-            &logger ) {
-        gen::parsing::ConfigurationParser p( logger, warnLevel );
-
-        for ( auto &file : confFiles ) {
-            p.parseFile( file );
-        }
-
-        return p;
-    }
-    void setTempFile( const std::string &str ) {
-        tempFile = str;
-    }
-    void genAPI( const std::unordered_map<gen::sentence_t, gen::id_t>  map,
-                 const std::string &dictFile, const std::string &gramFile ) {
-        if ( !tempFile.empty() ) {
-
-            emitter::createSequence( tempFile, dictFile, gramFile, &map, logger.get() );
-
-        }
-    }
-};
-
-
-void handleConfiguration(logger_ptr_t logger, std::unordered_multimap<OptionKey, std::string> &args) {
-    using namespace ui;
-    using cp = gen::parsing::ConfigurationParser;    
+using namespace ui;
+static std::string handleConfiguration( logger_ptr_t logger,
+                          std::unordered_multimap<OptionKey, std::string> &args, emitter::sent_map_t & finalMap ) {
+    using cp = gen::parsing::ConfigurationParser;
     cp::warningLevel_t warnLevel = cp::DEFAULT_WARN;
-    auto warnRange = args.equal_range(OptionKey::CONF_WARNINGS);
-    while(warnRange.first != warnRange.second) {
-        if(*warnRange.first == "-Wall") {
+    auto warnRange = args.equal_range( OptionKey::CONF_WARNINGS );
+
+    while ( warnRange.first != warnRange.second ) {
+        if ( (*warnRange.first).second == "-Wall" ) {
             warnLevel |= cp::Wall;
-        }else if (*warnRange.first == "-WDuplicate") {
+        } else if ( (*warnRange.first).second == "-WDuplicate" ) {
             warnLevel |= cp::WDuplicate;
-        }else if (*warnRange.first == "-WUnused") {
+        } else if ( (*warnRange.first).second == "-WUnused" ) {
             warnLevel |= cp::WUnused;
-        }else if (*warnRange.first == "WReAssign") {
+        } else if ( (*warnRange.first).second == "-WReAssign" ) {
             warnLevel |= cp::WReAssign;
         }
+
         ++warnRange.first;
     }
-    cp parser(logger, warnLevel);
-    auto confRange = args.equal_range(OptionKey::CONFIGURATION_FILES);
-    while(confRange.first != confRange.second) {
-        parser.parseFile(*confRange.first);
+
+    cp parser( logger, warnLevel );
+    auto confRange = args.equal_range( OptionKey::CONFIGURATION_FILES );
+
+    while ( confRange.first != confRange.second ) {
+        parser.parseFile( (*confRange.first).second );
         ++confRange.first;
     }
+
     // now we generate the grammar
-       
+    gen::grammar::Grammar gram( parser.sentences() );
+    gram.optimize( gen::optimizers::simpleFactoringOptimizer );
+    namespace bfs = boost::filesystem;
+    std::string randomName;
+    do {
+        randomName = gen::generateRandomString( GRAMMAR_NAME_LENGTH );
+        // generate a not in use file name (relative to working directory)
+    } while ( ( bfs::exists( randomName + ".jsgf" ) )
+              || ( bfs::exists( randomName + ".fsg" ) ) );
+    std::string jsgfGrammar = gen::grammar::createJSGF( gram, randomName );
+    const std::string jsgfName = randomName + ".jsgf";
+    const std::string fsgName = randomName + ".fsg";
+    std::ofstream outFile( jsgfName );
+    outFile << jsgfGrammar;
+    outFile.flush();
+    const std::string converter( "sphinx_jsgf2fsg" );
+    system( ( converter + " -jsgf " + jsgfName + " -fsg " + fsgName ).c_str() );
+    std::remove(jsgfName.c_str());
+    finalMap = parser.getFinalMap();
+    return fsgName;
 }
 
 
 
 int main( int argc, const char *argv[] ) {
-    using namespace ui;
     using namespace proteus::exceptions;
+    
     try {
         std::unique_ptr<ILogger> logger ( new BasicConsoleLogger() );
-        std::unordered_multimap<OptionKey, std::string> args = convertArgs( argc, argv );
-        if(args.count(CONFIGURATION_FILES) == 0) {
+        
+        std::unordered_multimap<OptionKey, std::string> args = getConfiguration(convertArgs( argc, argv));
+
+        if ( args.count( OptionKey::CONFIGURATION_FILES ) == 0 ) {
             std::cerr << "Fatal Error: No configuration files specified.\n";
             return -1;
         }
-        
+        emitter::sent_map_t finalMap;
         const std::string dictFileName = "dict.dict";
-        std::string fsgGrammarFileName;
-
-
-    }catch(InvalidArgs &e) {
+        std::string fsgGrammarFileName = handleConfiguration(logger.get(), args, finalMap);
+        // now we need to generate template
+        
+        auto tempFileRange = args.equal_range(OptionKey::TEMPLATE_FILES);
+        while(tempFileRange.first != tempFileRange.second) {
+            emitter::processTemplate( (*tempFileRange.first).second, dictFileName, fsgGrammarFileName, &finalMap, logger.get() );
+            ++tempFileRange.first;
+        }
+        
+        return 0;
+    } catch ( InvalidArgs &e ) {
         std::cerr << "Unknown Option/Argument : " << e.what()
-                  << "\nUse proteus -h for help\n"
-    }catch(NoWorkException &e) {
+                  << "\nUse proteus -h for help\n";
+        return -1;
+    } catch ( NoWorkException &e ) {
         // nothing to do
         return 0;
     }
