@@ -1,16 +1,18 @@
 
 FILE lib.hpp BEGIN
-#include "proteus.hpp"
+#include "lib/proteus.hpp"
 #include <map>
 #include <string>
 #include <functional>
+typedef std::function<void(std::string &)> callback_t;
 class Recognizer {
 	prot_t backend;
-	std::map<std::string, std::string > word_id;
-	std::multimap<std::string, std::function<void(std::string &)>>  id_handler;
+	std::map<std::string, std::string > word_id; // utterance -> id
+	std::multimap<std::string, callback_t>  id_handler; // id -> callback
+	std::function<callback_t> errorFunc;
 	public:
 		Recognizer();
-		void recognize_one();
+		std::string recognize_one();
 		void register_callback(std::function<void(std::string &)> func, const std::string &id );
 		~Recognizer();
 };
@@ -30,15 +32,24 @@ Recognizer::Recognizer() {
 	word_id[std::string(COMMAND_EX)] = std::string(ID_EX);
 	EXPAND_ME_END
 }
-void recognize_one() {
+std::string recognize_one() {
 	char * hyp = recog_word( backend );
 	std::string hypStr(hyp);
 	delete[] hyp;
-	auto range = id_handler.equal_range(hypStr);
-	while(range.first != range.second) {
-		(range.first.second)(hypStr);
-		++range.first;
+	if (word_id.count(hyp) != 0) {
+		auto id = word_id[hypStr];
+		auto range = id_handler.equal_range(id);
+		while(range.first != range.second) {
+			(range.first.second)(id);
+			++range.first;
+		}
+	}else {
+		// unknown string
+		if(errorFunc){
+			errorFunc(hypStr);
+		}
 	}
+	return hypStr;
 }
 void Recognizer::register_callback(std::function<void(std::string &)> func, const std::string &id ){
 	id_handler.emplace(std::make_pair(id, func));
