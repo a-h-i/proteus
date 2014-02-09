@@ -1,0 +1,28 @@
+FILE recog.py BEGIN
+from ctypes import *
+
+class Recognizer(object):
+	def __init__(self, lmPath):
+		gramPath = lmPath + '/THE_GRAMMAR'
+		dictPath = lmPath + '/THE_DICT'
+		self.word_id_dict = dict()
+		self.libprot = cdll.LoadLibrary("./libproteus.so")
+		#Now we populate the dictionary
+		EXPAND_ME_BEGIN
+		self.word_id_dict['COMMAND_EX'] = 'ID_EX'
+		EXPAND_ME_END
+		#initialize library
+		initFunc = self.libprot.prot_init
+		initFunc.restype = c_void_p
+
+		self.handle = initFunc(gramPath, dictPath)
+		self.recFunc = self.libprot.recog_word
+		self.recFunc.restype = c_char_p
+
+	def recog_word(self):
+		recognized = self.libprot.recog_word(self.handle)
+		return recognized
+
+
+FILE END
+

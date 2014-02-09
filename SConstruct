@@ -38,7 +38,7 @@ linkflags = ' `pkg-config --libs pocketsphinx` ' + ' `pkg-config --libs portaudi
 
 libenv = Environment(CXX = 'clang++', ENV = {'PATH' : os.environ['PATH']}, LINKFLAGS=linkflags)
 libenv['ENV']['TERM'] = os.environ['TERM']
-libenv['CXXFLAGS'] = '-Wall -Werror -fpic -std=c++11 -O3   -I/usr/include/sphinxbase -I/usr/include/pocketsphinx -I/usr/include/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/sphinxbase '
+libenv['CXXFLAGS'] = '-Wall -Werror -fpic -std=c++11 -g  -I/usr/include/sphinxbase -I/usr/include/pocketsphinx -I/usr/include/x86_64-linux-gnu -I/usr/include/x86_64-linux-gnu/sphinxbase '
 lib_packages = ['lib/src', 'lib/recorder/src']
 lib_objs = [make_package(libenv, 'lib', p) for p in lib_packages]
 l_target = libenv.SharedLibrary("proteus", lib_objs)

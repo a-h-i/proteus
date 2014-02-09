@@ -1,4 +1,7 @@
 #include "../grammar.hpp"
+#include <algorithm>
+#include <cctype>
+#include <functional>
 using namespace gen::grammar;
 
 std::string printProduction(const production_t &p) {
@@ -28,7 +31,9 @@ std::string gen::grammar::createJSGF( const Grammar &g, const std::string &name 
         } else {
             buff << "|(";
         }
-        buff << printProduction(p);
+        auto prodStr =   printProduction(p);
+        std::transform(prodStr.begin(), prodStr.end(), prodStr.begin(), std::ptr_fun<int, int>(std::tolower) );
+        buff << prodStr;
         buff << ")";
     }
     buff << ";";
@@ -52,6 +57,5 @@ std::string gen::grammar::createJSGF( const Grammar &g, const std::string &name 
             }
         }
     }
-
     return str;
 }

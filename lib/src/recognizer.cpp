@@ -97,5 +97,5 @@ void Recognizer::buffer( const std::int16_t *buff, std::size_t size ) {
 }
 
 Recognizer::~Recognizer() {
-    ps_free( ps );
+   // ps_free( ps );
 }

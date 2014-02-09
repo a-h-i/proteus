@@ -10,4 +10,10 @@ proteus
 proteus-dbg
 *.fsg
 *.os
+robot++
+lib.cpp
+lib.hpp
+recog.py
+*.pyc
+
 

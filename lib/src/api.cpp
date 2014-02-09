@@ -16,7 +16,7 @@ char *recog_word( prot_t p_ ) {
     // we set it to 0.01 of amplitude
 
     static silencers::silencer_t silen = silencers::RMSSilencer(
-            0.01 ); // I will have you know this is a well researched number
+            0.1 ); // I will have you know this is a well researched number
     Recognizer *p = reinterpret_cast<Recognizer *>( p_ );
     return p->recogWord( silen );
 }
