@@ -18,7 +18,7 @@ Recognizer::Recognizer( const std::string &grammar, const std::string &dict,
 
 
 
-char *Recognizer::recogWord( const silencers::silencer_t &silen ) {
+char *Recognizer::recogWord( const silencers::silencer_t &silen, const filters::filter_t &filt ) {
     // first we instruct the mic to start recording
     // WE must empty the buffer
     auto dummy = []( std::int16_t s ) {
@@ -26,12 +26,12 @@ char *Recognizer::recogWord( const silencers::silencer_t &silen ) {
     };
     ringBuff.consume_all( dummy );
     mic.start();
-    char *uttr = singleUttrHelper( silen );
+    char *uttr = singleUttrHelper( silen, filt );
     mic.stop();
     return uttr;
 }
 
-char *Recognizer::singleUttrHelper( const silencers::silencer_t &silen ) {
+char *Recognizer::singleUttrHelper( const silencers::silencer_t &silen, const filters::filter_t &filt ) {
     const char *utt, *hyp;
     hyp = utt = nullptr;
     // signal start utterance processing
@@ -47,11 +47,13 @@ char *Recognizer::singleUttrHelper( const silencers::silencer_t &silen ) {
     unsigned int times = 0;
 
     while ( true ) {
+        readSoFar = 0;
         do {
             // we process 1 second worth of data
             readSoFar += ringBuff.pop( &backBuffer[readSoFar], BUFF_SIZE - readSoFar );
             wait();
         } while ( readSoFar != BUFF_SIZE );
+        //std::vector<std::int16_t> filtered = filt(&backBuffer[0], readSoFar);
 
         if ( processedSomething && silen( &backBuffer[0], readSoFar ) ) {
             // 1 second of silence
@@ -67,13 +69,13 @@ char *Recognizer::singleUttrHelper( const silencers::silencer_t &silen ) {
                 return nullptr;
             }
         } else if ( (times >= 4) & (!processedSomething) ) {
+            // 4 seconds of silence from start
             ps_end_utt( ps );
             return nullptr;
         } else {
             // process data
             processedSomething = true;
             ps_process_raw( ps, &backBuffer[0], readSoFar, FALSE, FALSE );
-            readSoFar = 0;
         }
     }
 

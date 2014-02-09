@@ -1,5 +1,6 @@
 #pragma once
 #include "silencers.hpp"
+#include "filters.hpp"
 #include "recorder/microphone.hpp"
 
 #include <list>
@@ -28,7 +29,7 @@ class Recognizer {
     boost::lockfree::spsc_queue<std::int16_t> ringBuff;
     std::mutex m;
     std::condition_variable cv;
-    char *singleUttrHelper( const silencers::silencer_t & );
+    char *singleUttrHelper( const silencers::silencer_t &,  const filters::filter_t &  );
     void wait();
 public:
     const double SAMPLE_RATE; // advised to be atlease 8k
@@ -43,7 +44,7 @@ public:
     /***********************************
      * Provide a 'push to talk' method *
      ***********************************/
-    char *recogWord( const silencers::silencer_t & );
+    char *recogWord( const silencers::silencer_t &, const filters::filter_t & );
     /**************************************************
      * Called by subjects this instance is observing. *
      * so far only microphones.                       *

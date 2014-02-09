@@ -7,9 +7,10 @@ int main(int argc, char * argv[]) {
 	lmPath.remove_filename();
 	Recognizer rec(lmPath.generic_string());
 
-	
+		std::cout << "\nSpeak Now : \n";
 		std::string hyp = rec.recognize_one();
-		std::cout << "You Said" << hyp;
+		std::cout << "\nYou Said : "<< hyp 
+		 << "\n";
 		if(hyp == "Exit") {
 			return 0;
 		}

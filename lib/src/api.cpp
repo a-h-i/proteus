@@ -2,6 +2,7 @@
 #include "../recorder/microphone.hpp"
 #include "../recognizer.hpp"
 #include "../silencers.hpp"
+#include "../filters.hpp"
 #include <cmath>
 
 prot_t prot_init( const char *grammar, const char *dict ) {
@@ -17,8 +18,9 @@ char *recog_word( prot_t p_ ) {
 
     static silencers::silencer_t silen = silencers::RMSSilencer(
             0.1 ); // I will have you know this is a well researched number
+    static filters::SymmetricalMovingAverageFilter filter(11); // +- 5 points
     Recognizer *p = reinterpret_cast<Recognizer *>( p_ );
-    return p->recogWord( silen );
+    return p->recogWord( silen , filter);
 }
 
 void prot_free( prot_t p_ ) {
