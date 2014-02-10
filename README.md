@@ -3,8 +3,7 @@ proteus
 
 How to use:
 ===========
-  to create an API and grammar file simple run.
-  `proteus robot.cfg python.tmpl` to create the python example.
+  `proteus robot.cfg python.tmpl` will create the python example api.
   `proteus -h` will list the availble commands. You can provide more than one configuration and template file at the same time, and they will all be processed. Sample template and configuration files can be found in the project root directory and in the tool/tests subdirectory.
 
 How to build:
